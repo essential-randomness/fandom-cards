@@ -16,6 +16,8 @@ const Home: NextPage = () => {
     x: 450,
     y: 250,
   });
+  const cardHandler = React.useRef<any>({});
+  const outputRef = React.useRef<any>({});
 
   const [textValue, setTextValue] = React.useState("Merry Christmas!");
   const [backgroundColor, setBackgroundColor] = React.useState("#ff5252");
@@ -26,6 +28,7 @@ const Home: NextPage = () => {
         backgroundColor={backgroundColor}
         images={uploadedImages}
         text={textValue}
+        ref={cardHandler}
       />
       <div className={styles.controls}>
         <h3>Settings</h3>
@@ -70,6 +73,16 @@ const Home: NextPage = () => {
           value={backgroundColor}
           onChange={(e) => setBackgroundColor(e.target.value)}
         />
+        <button
+          onClick={() => {
+            const result = document.createElement("img");
+            result.src = cardHandler.current.getImageUrl();
+            outputRef.current.appendChild(result);
+          }}
+        >
+          Save
+        </button>
+        <div ref={outputRef}>Output:</div>
       </div>
     </div>
   );
