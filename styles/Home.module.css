@@ -1,5 +1,14 @@
 .container {
-  padding: 0 2rem;
+  padding: 2rem;
+  display: flex;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+}
+.imagesContainer img {
+  max-width: 100px;
 }
 
 .main {
