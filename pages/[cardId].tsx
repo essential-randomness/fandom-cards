@@ -5,7 +5,13 @@ const CardDisplay: NextPage<{ cardId: string }> = () => {
   const router = useRouter();
 
   const { data } = useQuery(["card", router.query.cardId], () => {
-    return fetch(`/api/card?${router.query.cardId}`).then((res) => res.json());
+    if (!router.query.cardId) {
+      return null;
+    }
+    console.log(router.query.cardId);
+    return fetch(`/api/card?cardId=${router.query.cardId}`).then((res) =>
+      res.json()
+    );
   });
 
   return <div>{data?.image && <img src={data.image} />}</div>;

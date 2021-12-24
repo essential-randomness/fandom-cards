@@ -6,6 +6,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import styles from "../styles/Home.module.css";
 import useImage from "use-image";
+import { useMutation } from "react-query";
 
 const HolidayCard = dynamic<
   HolidayCardProps & { innerRef: React.ForwardedRef<HolidayCardRef> }
@@ -41,6 +42,20 @@ const Home: NextPage = () => {
   >(null);
   const [backgroundColor, setBackgroundColor] = React.useState("#ff5252");
   const [currentMode, setCurrentMode] = React.useState(Modes.EDIT);
+
+  const { mutate: saveCard, isLoading: cardSaving } = useMutation(
+    ({ cardData }: { cardData: string }) => {
+      return fetch(`/api/card/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: cardData,
+        }),
+      });
+    }
+  );
 
   return (
     <div className={styles.container}>
@@ -148,9 +163,16 @@ const Home: NextPage = () => {
             </button>
             <button
               onClick={() => {
+                const imageUrl = cardHandler.current?.getImageUrl();
+                if (!imageUrl) {
+                  return;
+                }
+                saveCard({
+                  cardData: imageUrl,
+                });
                 console.log(cardHandler.current);
-                console.log(cardHandler.current?.getImageUrl());
-                setCurrentMode(Modes.DISPLAY);
+                console.log();
+                // setCurrentMode(Modes.DISPLAY);
               }}
             >
               Send to friend!
