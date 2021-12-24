@@ -1,4 +1,12 @@
-import { Image, Layer, Rect, Stage, Text, Transformer } from "react-konva";
+import {
+  Group,
+  Image,
+  Layer,
+  Rect,
+  Stage,
+  Text,
+  Transformer,
+} from "react-konva";
 
 import Konva from "konva";
 import React from "react";
@@ -7,10 +15,38 @@ import useImage from "use-image";
 const STAGE_WIDTH = 800;
 const STAGE_HEIGHT = 600;
 
+function getScaledImageCoordinates({
+  containerHeight,
+  containerWidth,
+  width,
+  height,
+}: {
+  containerWidth: number;
+  containerHeight: number;
+  width: number;
+  height: number;
+}) {
+  if (width == 0 || height == 0) {
+    console.log("removing width and height");
+    return { newWidth: 0, newHeight: 0 };
+  }
+  var widthRatio = containerWidth / width,
+    heightRatio = containerHeight / height;
+  var bestRatio = Math.max(widthRatio, heightRatio);
+  var newWidth = width * bestRatio,
+    newHeight = height * bestRatio;
+  console.log(newWidth, newHeight);
+  console.log("returning width and height");
+  return { newWidth, newHeight };
+}
+
 export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
-  ({ backgroundColor, text, images }, ref) => {
-    const [santa] = useImage("/santa.png");
+  ({ backgroundColor, text, images, backgroundUrl }, ref) => {
+    const [santa] = useImage("/sexy_santa.png");
+    const [sexySantaMask] = useImage("/sexy_santa_mask.png");
     const trRef = React.useRef<any>();
+    const [backgroundImage, setBackgroundImage] =
+      React.useState<HTMLImageElement | null>(null);
 
     const [selectedImage, setSelectedImage] =
       React.useState<HTMLImageElement | null>(null);
@@ -43,6 +79,18 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
       }
     }, [images, selectedImage]);
 
+    React.useEffect(() => {
+      if (!backgroundUrl) {
+        setBackgroundImage(null);
+        return;
+      }
+      const backgroundImage = document.createElement("img");
+      backgroundImage.src = backgroundUrl;
+      backgroundImage.onload = () => {
+        setBackgroundImage(backgroundImage);
+      };
+    }, [backgroundUrl]);
+
     return (
       <Stage
         width={STAGE_WIDTH}
@@ -54,6 +102,7 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
           const toBeSelected = containerRef.current.getIntersection(
             stageRef.current.getPointerPosition()!
           );
+          console.log(toBeSelected);
           if (toBeSelected && "image" in toBeSelected) {
             setSelectedImage(
               ((toBeSelected as Konva.Image).image() as HTMLImageElement) ||
@@ -73,29 +122,55 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
             height={STAGE_HEIGHT}
             fill={backgroundColor}
           />
+          {backgroundImage && (
+            <Image
+              image={backgroundImage}
+              width={
+                getScaledImageCoordinates({
+                  containerWidth: STAGE_WIDTH,
+                  containerHeight: STAGE_HEIGHT,
+                  width: backgroundImage.width,
+                  height: backgroundImage.height,
+                }).newWidth
+              }
+              height={
+                getScaledImageCoordinates({
+                  containerWidth: STAGE_WIDTH,
+                  containerHeight: STAGE_HEIGHT,
+                  width: backgroundImage.width,
+                  height: backgroundImage.height,
+                }).newHeight
+              }
+            />
+          )}
         </Layer>
         <Layer ref={containerRef}>
-          {images.map((image, index) => {
-            return (
-              <Image
-                key={index}
-                width={100}
-                height={100}
-                //   onClick={() => setSelectedImage(image)}
-                image={image}
-                // isSelected={true}
-                draggable
-                // onDragEnd={(e) => {
-                //   setBigBossPosition({ x: e.target.x(), y: e.target.y() });
-                // }}
-                alt="big boss' sweet face"
-                ref={(shapeRef) => {
-                  // @ts-ignore
-                  imageRefs.current[image.src] = shapeRef!;
-                }}
-              />
-            );
-          })}
+          <Group>
+            {images.map((image, index) => {
+              return (
+                <Image
+                  key={index}
+                  width={100}
+                  height={100}
+                  //   onClick={() => setSelectedImage(image)}
+                  image={image}
+                  // isSelected={true}
+                  draggable
+                  // onDragEnd={(e) => {
+                  //   setBigBossPosition({ x: e.target.x(), y: e.target.y() });
+                  // }}
+                  alt="big boss' sweet face"
+                  ref={(shapeRef) => {
+                    // @ts-ignore
+                    imageRefs.current[image.src] = shapeRef!;
+                  }}
+                />
+              );
+            })}
+          </Group>
+          {/* <Group globalCompositeOperation={"destination-in"}>
+            <Image x={0} y={0} image={sexySantaMask} listening={false}></Image>
+          </Group> */}
           <Transformer
             ref={trRef}
             boundBoxFunc={(oldBox, newBox) => {
@@ -130,5 +205,6 @@ export interface HolidayCardRef {
 export interface HolidayCardProps {
   text: string;
   backgroundColor: string;
+  backgroundUrl: string | null;
   images: HTMLImageElement[];
 }

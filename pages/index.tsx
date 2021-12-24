@@ -28,6 +28,9 @@ const Home: NextPage = () => {
   const outputRef = React.useRef<any>({});
 
   const [textValue, setTextValue] = React.useState("Merry Christmas!");
+  const [selectedBackground, setSelectedBackground] = React.useState<
+    string | null
+  >(null);
   const [backgroundColor, setBackgroundColor] = React.useState("#ff5252");
 
   return (
@@ -36,6 +39,7 @@ const Home: NextPage = () => {
         backgroundColor={backgroundColor}
         images={uploadedImages}
         text={textValue}
+        backgroundUrl={selectedBackground}
         ref={cardHandler}
       />
       <div className={styles.controls}>
@@ -79,6 +83,21 @@ const Home: NextPage = () => {
           onChange={(e) => setBackgroundColor(e.target.value)}
         />
         <button
+          className="background"
+          onClick={() => setSelectedBackground("/christmas_background.jpg")}
+        >
+          <img src="/christmas_background.jpg" />
+        </button>
+        <button
+          className="background"
+          onClick={() => setSelectedBackground("/gold_background.jpg")}
+        >
+          <img src="/gold_background.jpg" />
+        </button>
+        <button onClick={() => setSelectedBackground(null)}>
+          Remove background
+        </button>
+        <button
           onClick={() => {
             const result = document.createElement("img");
             result.src = cardHandler.current!.getImageUrl()!;
@@ -87,8 +106,12 @@ const Home: NextPage = () => {
         >
           Save
         </button>
-        <div ref={outputRef}>Output:</div>
       </div>
+      <style jsx>{`
+        .background img {
+          max-width: 100px;
+        }
+      `}</style>
     </div>
   );
 };
