@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import styles from "../styles/Home.module.css";
 import useImage from "use-image";
 import { useMutation } from "react-query";
+import { useRouter } from "next/router";
 
 const HolidayCard = dynamic<
   HolidayCardProps & { innerRef: React.ForwardedRef<HolidayCardRef> }
@@ -33,6 +34,7 @@ const Home: NextPage = () => {
   });
   const cardHandler = React.useRef<HolidayCardRef>(null);
   const outputRef = React.useRef<any>({});
+  const router = useRouter();
 
   const [textValue, setTextValue] = React.useState("Merry Christmas!");
   const [textColor, setTextColor] = React.useState("#000000");
@@ -43,7 +45,7 @@ const Home: NextPage = () => {
   const [backgroundColor, setBackgroundColor] = React.useState("#ff5252");
   const [currentMode, setCurrentMode] = React.useState(Modes.EDIT);
 
-  const { mutate: saveCard, isLoading: cardSaving } = useMutation(
+  const { mutate: saveCard, isLoading: isSaving } = useMutation(
     ({ cardData }: { cardData: string }) => {
       return fetch(`/api/card/`, {
         method: "POST",
@@ -54,6 +56,12 @@ const Home: NextPage = () => {
           image: cardData,
         }),
       });
+    },
+    {
+      onSuccess: async (data) => {
+        const result = (await data.json()) as { url: string };
+        router.push(`/[cardId]`, `/${result.url}`);
+      },
     }
   );
 
@@ -152,7 +160,7 @@ const Home: NextPage = () => {
             Preview
           </button>
         )}
-        {currentMode == Modes.PREVIEW && (
+        {currentMode == Modes.PREVIEW && !isSaving && (
           <div>
             <button
               onClick={() => {
@@ -170,8 +178,6 @@ const Home: NextPage = () => {
                 saveCard({
                   cardData: imageUrl,
                 });
-                console.log(cardHandler.current);
-                console.log();
                 // setCurrentMode(Modes.DISPLAY);
               }}
             >
@@ -179,6 +185,7 @@ const Home: NextPage = () => {
             </button>
           </div>
         )}
+        {isSaving && <div>Saving...</div>}
       </div>
       <style jsx>{`
         .background img {
