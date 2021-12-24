@@ -1,10 +1,18 @@
-// { Image, Layer, Rect, Stage }
+import { HolidayCardProps, HolidayCardRef } from "./HolidayCard";
+
 import Head from "next/head";
-import { HolidayCard } from "./HolidayCard";
 import type { NextPage } from "next";
 import React from "react";
+import dynamic from "next/dynamic";
 import styles from "../styles/Home.module.css";
 import useImage from "use-image";
+
+const HolidayCard = dynamic<
+  HolidayCardProps & { ref: React.ForwardedRef<HolidayCardRef> }
+>(() => import("./HolidayCard").then((mod) => mod.HolidayCard), {
+  ssr: false,
+  loading: () => <div>loading</div>,
+});
 
 const Home: NextPage = () => {
   const [bigBoss] = useImage("/bigboss.png");
@@ -16,7 +24,7 @@ const Home: NextPage = () => {
     x: 450,
     y: 250,
   });
-  const cardHandler = React.useRef<any>({});
+  const cardHandler = React.useRef<HolidayCardRef>(null);
   const outputRef = React.useRef<any>({});
 
   const [textValue, setTextValue] = React.useState("Merry Christmas!");
@@ -59,9 +67,6 @@ const Home: NextPage = () => {
             if (!e.target.files) {
               return;
             }
-            console.log(e);
-            console.log(e.target.files);
-            console.log(URL.createObjectURL(e.target.files[0]));
             const image = document.createElement("img");
             image.src = URL.createObjectURL(e.target.files[0]);
             setUploadedImages([...uploadedImages, image]);
@@ -76,7 +81,7 @@ const Home: NextPage = () => {
         <button
           onClick={() => {
             const result = document.createElement("img");
-            result.src = cardHandler.current.getImageUrl();
+            result.src = cardHandler.current!.getImageUrl()!;
             outputRef.current.appendChild(result);
           }}
         >
