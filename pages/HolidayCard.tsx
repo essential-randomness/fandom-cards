@@ -27,7 +27,6 @@ function getScaledImageCoordinates({
   height: number;
 }) {
   if (width == 0 || height == 0) {
-    console.log("removing width and height");
     return { newWidth: 0, newHeight: 0 };
   }
   var widthRatio = containerWidth / width,
@@ -35,13 +34,14 @@ function getScaledImageCoordinates({
   var bestRatio = Math.max(widthRatio, heightRatio);
   var newWidth = width * bestRatio,
     newHeight = height * bestRatio;
-  console.log(newWidth, newHeight);
-  console.log("returning width and height");
   return { newWidth, newHeight };
 }
 
 export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
-  ({ backgroundColor, text, images, backgroundUrl }, ref) => {
+  (
+    { backgroundColor, text, textColor, fontSize, images, backgroundUrl },
+    ref
+  ) => {
     const [santa] = useImage("/sexy_santa.png");
     const [sexySantaMask] = useImage("/sexy_santa_mask.png");
     const trRef = React.useRef<any>();
@@ -52,7 +52,13 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
       React.useState<HTMLImageElement | null>(null);
     const imageRefs = React.useRef<{ [key: string]: typeof Image }>({});
     const containerRef = React.useRef<Konva.Layer>(null);
+    const textRef = React.useRef<Konva.Text>(null);
     const stageRef = React.useRef<any>(null);
+
+    const [textDimension, setTextDimension] = React.useState({
+      width: 0,
+      height: 0,
+    });
 
     React.useImperativeHandle(ref, () => ({
       getImageUrl: () =>
@@ -90,6 +96,19 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
         setBackgroundImage(backgroundImage);
       };
     }, [backgroundUrl]);
+
+    React.useEffect(() => {
+      if (!textRef.current) {
+        return;
+      }
+      const lineAmounts = text.split("\n").length;
+      const textSize = textRef.current.measureSize(text);
+
+      setTextDimension({
+        width: textSize.width,
+        height: textSize.height * lineAmounts,
+      });
+    }, [text]);
 
     return (
       <Stage
@@ -141,6 +160,7 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
                   height: backgroundImage.height,
                 }).newHeight
               }
+              alt="The card background"
             />
           )}
         </Layer>
@@ -186,11 +206,17 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
           <Image x={0} y={0} image={santa} listening={false} />
           <Text
             text={text}
-            fontSize={45}
+            fontSize={fontSize}
             fontFamily="Comic Sans MS"
             listening={false}
             x={STAGE_WIDTH / 2}
-            y={STAGE_HEIGHT / 2 - 50}
+            y={
+              textDimension.height > 0
+                ? STAGE_HEIGHT / 2 - textDimension.height / 2
+                : STAGE_HEIGHT / 2
+            }
+            fill={textColor}
+            ref={textRef}
           />
         </Layer>
       </Stage>
@@ -204,6 +230,8 @@ export interface HolidayCardRef {
 }
 export interface HolidayCardProps {
   text: string;
+  textColor: string;
+  fontSize: number;
   backgroundColor: string;
   backgroundUrl: string | null;
   images: HTMLImageElement[];

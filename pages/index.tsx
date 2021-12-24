@@ -28,6 +28,8 @@ const Home: NextPage = () => {
   const outputRef = React.useRef<any>({});
 
   const [textValue, setTextValue] = React.useState("Merry Christmas!");
+  const [textColor, setTextColor] = React.useState("#000000");
+  const [fontSize, setFontSize] = React.useState(45);
   const [selectedBackground, setSelectedBackground] = React.useState<
     string | null
   >(null);
@@ -39,6 +41,8 @@ const Home: NextPage = () => {
         backgroundColor={backgroundColor}
         images={uploadedImages}
         text={textValue}
+        textColor={textColor}
+        fontSize={fontSize}
         backgroundUrl={selectedBackground}
         ref={cardHandler}
       />
@@ -46,10 +50,22 @@ const Home: NextPage = () => {
         <h3>Settings</h3>
         <label>Message</label>
         <textarea
-          // type="text"
           value={textValue}
           onChange={(e) => setTextValue(e.target.value)}
         />
+        <input
+          type="color"
+          value={textColor}
+          onChange={(e) => setTextColor(e.target.value)}
+        />
+        <input
+          type="range"
+          min="10"
+          max="100"
+          value={fontSize}
+          onChange={(e) => setFontSize(parseInt(e.target.value))}
+        />
+
         {uploadedImages.map((uploadedImage) => (
           <div key={uploadedImage.src} className={styles.imagesContainer}>
             <img src={uploadedImage.src} />
@@ -74,6 +90,7 @@ const Home: NextPage = () => {
             const image = document.createElement("img");
             image.src = URL.createObjectURL(e.target.files[0]);
             setUploadedImages([...uploadedImages, image]);
+            e.target.value = "";
           }}
         />
         <label>Background color</label>
