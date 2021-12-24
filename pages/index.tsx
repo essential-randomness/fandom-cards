@@ -8,7 +8,7 @@ import styles from "../styles/Home.module.css";
 import useImage from "use-image";
 
 const HolidayCard = dynamic<
-  HolidayCardProps & { ref: React.ForwardedRef<HolidayCardRef> }
+  HolidayCardProps & { innerRef: React.ForwardedRef<HolidayCardRef> }
 >(() => import("./HolidayCard").then((mod) => mod.HolidayCard), {
   ssr: false,
   loading: () => <div>loading</div>,
@@ -16,7 +16,8 @@ const HolidayCard = dynamic<
 
 enum Modes {
   EDIT,
-  VIEW,
+  PREVIEW,
+  DISPLAY,
 }
 
 const Home: NextPage = () => {
@@ -50,7 +51,7 @@ const Home: NextPage = () => {
         textColor={textColor}
         fontSize={fontSize}
         backgroundUrl={selectedBackground}
-        ref={cardHandler}
+        innerRef={cardHandler}
         maskContent={currentMode != Modes.EDIT}
       />
       <div className={styles.controls}>
@@ -130,20 +131,31 @@ const Home: NextPage = () => {
         {currentMode == Modes.EDIT && (
           <button
             onClick={() => {
-              setCurrentMode(Modes.VIEW);
+              setCurrentMode(Modes.PREVIEW);
             }}
           >
             Preview
           </button>
         )}
-        {currentMode == Modes.VIEW && (
-          <button
-            onClick={() => {
-              setCurrentMode(Modes.EDIT);
-            }}
-          >
-            Back to edit
-          </button>
+        {currentMode == Modes.PREVIEW && (
+          <div>
+            <button
+              onClick={() => {
+                setCurrentMode(Modes.EDIT);
+              }}
+            >
+              Back to edit
+            </button>
+            <button
+              onClick={() => {
+                console.log(cardHandler.current);
+                console.log(cardHandler.current?.getImageUrl());
+                setCurrentMode(Modes.DISPLAY);
+              }}
+            >
+              Send to friend!
+            </button>
+          </div>
         )}
       </div>
       <style jsx>{`

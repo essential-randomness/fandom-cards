@@ -37,7 +37,7 @@ function getScaledImageCoordinates({
   return { newWidth, newHeight };
 }
 
-export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
+const HolidayCardWithRef = React.forwardRef<HolidayCardRef, HolidayCardProps>(
   (
     {
       backgroundColor,
@@ -238,8 +238,13 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
     );
   }
 );
-HolidayCard.displayName = "HolidayCardForwardRef";
+HolidayCardWithRef.displayName = "HolidayCardForwardRef";
 
+export const HolidayCard: React.FC<
+  HolidayCardProps & { innerRef: React.ForwardedRef<HolidayCardRef> }
+> = (props) => {
+  return <HolidayCardWithRef {...props} ref={props.innerRef} />;
+};
 export interface HolidayCardRef {
   getImageUrl: () => string | undefined;
 }
