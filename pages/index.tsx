@@ -14,6 +14,11 @@ const HolidayCard = dynamic<
   loading: () => <div>loading</div>,
 });
 
+enum Modes {
+  EDIT,
+  VIEW,
+}
+
 const Home: NextPage = () => {
   const [bigBoss] = useImage("/bigboss.png");
   const [uploadedImages, setUploadedImages] = React.useState<
@@ -34,6 +39,7 @@ const Home: NextPage = () => {
     string | null
   >(null);
   const [backgroundColor, setBackgroundColor] = React.useState("#ff5252");
+  const [currentMode, setCurrentMode] = React.useState(Modes.EDIT);
 
   return (
     <div className={styles.container}>
@@ -45,6 +51,7 @@ const Home: NextPage = () => {
         fontSize={fontSize}
         backgroundUrl={selectedBackground}
         ref={cardHandler}
+        maskContent={currentMode != Modes.EDIT}
       />
       <div className={styles.controls}>
         <h3>Settings</h3>
@@ -111,18 +118,33 @@ const Home: NextPage = () => {
         >
           <img src="/gold_background.jpg" />
         </button>
+        <button
+          className="background"
+          onClick={() => setSelectedBackground("/gifts_pattern.jpg")}
+        >
+          <img src="/gifts_pattern.jpg" />
+        </button>
         <button onClick={() => setSelectedBackground(null)}>
           Remove background
         </button>
-        <button
-          onClick={() => {
-            const result = document.createElement("img");
-            result.src = cardHandler.current!.getImageUrl()!;
-            outputRef.current.appendChild(result);
-          }}
-        >
-          Save
-        </button>
+        {currentMode == Modes.EDIT && (
+          <button
+            onClick={() => {
+              setCurrentMode(Modes.VIEW);
+            }}
+          >
+            Preview
+          </button>
+        )}
+        {currentMode == Modes.VIEW && (
+          <button
+            onClick={() => {
+              setCurrentMode(Modes.EDIT);
+            }}
+          >
+            Back to edit
+          </button>
+        )}
       </div>
       <style jsx>{`
         .background img {

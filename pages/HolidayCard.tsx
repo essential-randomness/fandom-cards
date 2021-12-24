@@ -39,7 +39,15 @@ function getScaledImageCoordinates({
 
 export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
   (
-    { backgroundColor, text, textColor, fontSize, images, backgroundUrl },
+    {
+      backgroundColor,
+      text,
+      textColor,
+      fontSize,
+      images,
+      backgroundUrl,
+      maskContent,
+    },
     ref
   ) => {
     const [santa] = useImage("/sexy_santa.png");
@@ -188,9 +196,16 @@ export const HolidayCard = React.forwardRef<HolidayCardRef, HolidayCardProps>(
               );
             })}
           </Group>
-          {/* <Group globalCompositeOperation={"destination-in"}>
-            <Image x={0} y={0} image={sexySantaMask} listening={false}></Image>
-          </Group> */}
+          {maskContent && (
+            <Group globalCompositeOperation={"destination-in"}>
+              <Image
+                x={0}
+                y={0}
+                image={sexySantaMask}
+                listening={false}
+              ></Image>
+            </Group>
+          )}
           <Transformer
             ref={trRef}
             boundBoxFunc={(oldBox, newBox) => {
@@ -235,4 +250,5 @@ export interface HolidayCardProps {
   backgroundColor: string;
   backgroundUrl: string | null;
   images: HTMLImageElement[];
+  maskContent: boolean;
 }
